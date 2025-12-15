@@ -471,20 +471,6 @@ export default function ProductDetailPage() {
                                     </button>
                                 )}
                             </div>
-
-                            {/* Payment Option */}
-                            <div
-                                className="rounded-lg p-4 mt-4"
-                                style={{ backgroundColor: 'var(--bg-tertiary)' }}
-                            >
-                                <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Get it now, pay later</div>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <span className="font-bold" style={{ color: 'var(--text-primary)' }}>mobicred</span>
-                                    <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                                        from R{Math.round(parseFloat(product.price) / 12).toLocaleString()} p/m
-                                    </span>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
