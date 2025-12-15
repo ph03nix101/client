@@ -55,6 +55,7 @@ export interface CreateProductPayload {
     original_price?: number;
     description?: string;
     condition: string;
+    condition_description?: string;
     specs: Record<string, unknown>;
     cpu_ref_id?: number;
     gpu_ref_id?: number;
@@ -70,6 +71,7 @@ export interface Product {
     original_price?: string; // numeric string from backend
     description?: string;
     condition: string;
+    condition_description?: string;
     specs: Record<string, unknown>;
     cpu_ref_id?: number;
     gpu_ref_id?: number;

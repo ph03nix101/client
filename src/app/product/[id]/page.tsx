@@ -515,6 +515,16 @@ export default function ProductDetailPage() {
 
                     {/* Description & Features */}
                     <div className="border-t pt-6" style={{ borderColor: 'var(--border)' }}>
+                        {product.condition !== 'New' && product.condition_description && (
+                            <div className="mb-6 p-4 rounded-lg bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800">
+                                <h3 className="text-sm font-semibold text-orange-800 dark:text-orange-200 mb-1">
+                                    Condition Details
+                                </h3>
+                                <p className="text-sm text-orange-700 dark:text-orange-300">
+                                    {product.condition_description}
+                                </p>
+                            </div>
+                        )}
                         {product.description && (
                             <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>{product.description}</p>
                         )}

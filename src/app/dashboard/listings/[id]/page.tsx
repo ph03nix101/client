@@ -45,6 +45,7 @@ interface FormData {
     original_price?: string;
     description?: string;
     condition: string;
+    condition_description?: string;
     specs: Record<string, unknown>;
 }
 
@@ -146,6 +147,7 @@ export default function EditListingPage() {
                 original_price: productData.original_price?.toString() || '',
                 description: productData.description || '',
                 condition: productData.condition,
+                condition_description: productData.condition_description || '',
                 specs: productData.specs as Record<string, unknown>,
             });
 
@@ -193,6 +195,7 @@ export default function EditListingPage() {
                 original_price: data.original_price ? parseFloat(data.original_price) : undefined,
                 description: data.description,
                 condition: data.condition,
+                condition_description: data.condition !== 'New' ? data.condition_description : undefined,
                 specs: data.specs,
             });
 
@@ -413,6 +416,25 @@ export default function EditListingPage() {
                                 required
                             />
                         </div>
+                        {watch('condition') && watch('condition') !== 'New' && (
+                            <div className="mt-4 animate-fade-in block col-span-2">
+                                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                                    Condition Description (Optional)
+                                </label>
+                                <textarea
+                                    {...register('condition_description')}
+                                    rows={2}
+                                    className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                    style={{
+                                        backgroundColor: 'var(--input-bg)',
+                                        borderColor: 'var(--border)',
+                                        color: 'var(--text-primary)',
+                                    }}
+                                    placeholder="e.g., Minor scratches on the screen, includes generic charger..."
+                                />
+                            </div>
+                        )}
+
                         <div>
                             <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                                 Description
@@ -535,6 +557,6 @@ export default function EditListingPage() {
                     </Button>
                 </div>
             </form>
-        </DashboardLayout>
+        </DashboardLayout >
     );
 }
