@@ -8,7 +8,9 @@ import { usersApi, productsApi, uploadsApi, User } from '@/lib/api';
 import { Header } from '@/components/Header';
 import { ProductCard } from '@/components/ProductCard';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
-import { FiUser, FiCalendar, FiMapPin, FiPackage } from 'react-icons/fi';
+import { SellerRatingSummary } from '@/components/SellerRating';
+import { ReviewList } from '@/components/ReviewList';
+import { FiUser, FiCalendar, FiMapPin, FiPackage, FiStar } from 'react-icons/fi';
 
 export default function SellerProfilePage() {
     const params = useParams();
@@ -170,6 +172,26 @@ export default function SellerProfilePage() {
                                 {activeProducts.length} active {activeProducts.length === 1 ? 'listing' : 'listings'}
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* Ratings & Reviews Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    {/* Rating Summary */}
+                    <div>
+                        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                            <FiStar className="w-5 h-5" />
+                            Seller Rating
+                        </h2>
+                        <SellerRatingSummary sellerId={seller.id} />
+                    </div>
+
+                    {/* Reviews */}
+                    <div className="lg:col-span-2">
+                        <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                            Reviews
+                        </h2>
+                        <ReviewList sellerId={seller.id} initialLimit={5} />
                     </div>
                 </div>
 

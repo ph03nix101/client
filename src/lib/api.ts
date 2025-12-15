@@ -350,4 +350,199 @@ export const auctionsApi = {
         api.patch<Auction>(`/auctions/${auctionId}/cancel`).then(res => res.data),
 };
 
+// Ratings types
+export interface SellerRating {
+    id: string;
+    seller_id: string;
+    reviewer_id: string;
+    product_id: string | null;
+    rating: number;
+    review: string | null;
+    created_at: string;
+    updated_at: string;
+    reviewer_name?: string;
+    reviewer_avatar?: string;
+    product_title?: string;
+}
+
+export interface SellerStats {
+    average_rating: number;
+    total_ratings: number;
+    positive_count: number;
+    positive_percentage: number;
+    rating_distribution: {
+        1: number;
+        2: number;
+        3: number;
+        4: number;
+        5: number;
+    };
+}
+
+export const ratingsApi = {
+    create: (sellerId: string, rating: number, review?: string, productId?: string) =>
+        api.post<SellerRating>('/ratings', {
+            seller_id: sellerId,
+            rating,
+            review,
+            product_id: productId,
+        }).then(res => res.data),
+    getSellerRatings: (sellerId: string, limit = 10, offset = 0) =>
+        api.get<SellerRating[]>(`/ratings/seller/${sellerId}`, {
+            params: { limit, offset },
+        }).then(res => res.data),
+    getSellerStats: (sellerId: string) =>
+        api.get<SellerStats>(`/ratings/seller/${sellerId}/stats`).then(res => res.data),
+    canRate: (sellerId: string) =>
+        api.get<{ canRate: boolean }>(`/ratings/seller/${sellerId}/can-rate`).then(res => res.data.canRate),
+    getMyRating: (sellerId: string, productId?: string) =>
+        api.get<{ rating: SellerRating | null }>(`/ratings/seller/${sellerId}/my-rating`, {
+            params: productId ? { product_id: productId } : {},
+        }).then(res => res.data.rating),
+    update: (id: string, rating: number, review?: string) =>
+        api.patch<SellerRating>(`/ratings/${id}`, { rating, review }).then(res => res.data),
+    delete: (id: string) =>
+        api.delete<{ message: string }>(`/ratings/${id}`).then(res => res.data),
+};
+
+// Shipping types
+export interface ShippingOption {
+    id: string;
+    seller_id: string;
+    name: string;
+    price: number;
+    estimated_days_min: number | null;
+    estimated_days_max: number | null;
+    coverage_area: string | null;
+    is_collection: boolean;
+    collection_address: string | null;
+    is_default: boolean;
+    is_active: boolean;
+    created_at: string;
+}
+
+export interface ProductShipping {
+    id: string;
+    product_id: string;
+    shipping_option_id: string | null;
+    custom_price: number | null;
+    custom_estimated_days_min: number | null;
+    custom_estimated_days_max: number | null;
+    custom_coverage_area: string | null;
+    is_active: boolean;
+    display_order: number;
+    // Computed/joined fields
+    name?: string;
+    price?: number;
+    estimated_days_min?: number | null;
+    estimated_days_max?: number | null;
+    coverage_area?: string | null;
+    is_collection?: boolean;
+    collection_address?: string | null;
+}
+
+export interface CreateShippingTemplateData {
+    name: string;
+    price: number;
+    estimated_days_min?: number;
+    estimated_days_max?: number;
+    coverage_area?: string;
+    is_collection?: boolean;
+    collection_address?: string;
+    is_default?: boolean;
+}
+
+export const shippingApi = {
+    // Template CRUD
+    createTemplate: (data: CreateShippingTemplateData) =>
+        api.post<ShippingOption>('/shipping/templates', data).then(res => res.data),
+    getMyTemplates: () =>
+        api.get<ShippingOption[]>('/shipping/templates').then(res => res.data),
+    getSellerTemplates: (sellerId: string) =>
+        api.get<ShippingOption[]>(`/shipping/templates/seller/${sellerId}`).then(res => res.data),
+    getTemplateById: (id: string) =>
+        api.get<ShippingOption>(`/shipping/templates/${id}`).then(res => res.data),
+    updateTemplate: (id: string, data: Partial<CreateShippingTemplateData>) =>
+        api.patch<ShippingOption>(`/shipping/templates/${id}`, data).then(res => res.data),
+    deleteTemplate: (id: string) =>
+        api.delete<{ message: string }>(`/shipping/templates/${id}`).then(res => res.data),
+
+    // Product shipping
+    getProductShipping: (productId: string) =>
+        api.get<ProductShipping[]>(`/shipping/product/${productId}`).then(res => res.data),
+    assignShipping: (productId: string, data: {
+        shipping_option_id?: string;
+        custom_price?: number;
+        custom_estimated_days_min?: number;
+        custom_estimated_days_max?: number;
+        custom_coverage_area?: string;
+        display_order?: number;
+    }) =>
+        api.post<ProductShipping>(`/shipping/product/${productId}`, data).then(res => res.data),
+    assignDefaultShipping: (productId: string) =>
+        api.post<{ message: string }>(`/shipping/product/${productId}/defaults`).then(res => res.data),
+    removeShipping: (productShippingId: string) =>
+        api.delete<{ message: string }>(`/shipping/product-shipping/${productShippingId}`).then(res => res.data),
+};
+
+// Order types
+export interface Order {
+    id: string;
+    product_id: string;
+    seller_id: string;
+    buyer_id: string;
+    amount: number;
+    shipping_cost: number;
+    total: number;
+    status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+    shipping_address: string | null;
+    tracking_number: string | null;
+    notes: string | null;
+    created_at: string;
+    updated_at: string;
+    product_title?: string;
+    product_image?: string;
+    buyer_username?: string;
+    buyer_email?: string;
+    seller_username?: string;
+}
+
+export interface SellerOrderStats {
+    total_revenue: number;
+    total_sales: number;
+    pending_orders: number;
+    this_month_revenue: number;
+    this_month_sales: number;
+}
+
+export const ordersApi = {
+    create: (data: {
+        product_id: string;
+        seller_id: string;
+        amount: number;
+        shipping_cost?: number;
+        shipping_address?: string;
+        notes?: string;
+    }) => api.post<Order>('/orders', data).then(res => res.data),
+
+    getMySales: (limit = 20, offset = 0) =>
+        api.get<Order[]>('/orders/sales', { params: { limit, offset } }).then(res => res.data),
+
+    getMyPurchases: (limit = 20, offset = 0) =>
+        api.get<Order[]>('/orders/purchases', { params: { limit, offset } }).then(res => res.data),
+
+    getStats: () =>
+        api.get<SellerOrderStats>('/orders/stats').then(res => res.data),
+
+    getRecentSales: (limit = 5) =>
+        api.get<Order[]>('/orders/recent', { params: { limit } }).then(res => res.data),
+
+    getById: (id: string) =>
+        api.get<Order>(`/orders/${id}`).then(res => res.data),
+
+    updateStatus: (id: string, status: string, trackingNumber?: string) =>
+        api.patch<Order>(`/orders/${id}/status`, { status, tracking_number: trackingNumber }).then(res => res.data),
+};
+
 export default api;
+

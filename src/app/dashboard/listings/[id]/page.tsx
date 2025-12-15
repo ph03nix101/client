@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-import { productsApi, categoriesApi, uploadsApi, auctionsApi } from '@/lib/api';
+import { productsApi, categoriesApi, uploadsApi, auctionsApi, shippingApi, ProductShipping } from '@/lib/api';
+import { ShippingSelector, SelectedShipping } from '@/components/ShippingSelector';
 import { Auction, Product, CategoryAttribute } from '@/types';
 import { DynamicFormField } from '@/components/DynamicFormField';
 import { ImageUpload } from '@/components/ImageUpload';
@@ -65,6 +66,10 @@ export default function EditListingPage() {
     const [reservePrice, setReservePrice] = useState('');
     const [buyNowPrice, setBuyNowPrice] = useState('');
     const [hasActiveBids, setHasActiveBids] = useState(false);
+
+    // Shipping state
+    const [selectedShipping, setSelectedShipping] = useState<SelectedShipping[]>([]);
+    const [existingShipping, setExistingShipping] = useState<ProductShipping[]>([]);
 
     const {
         register,
@@ -134,7 +139,6 @@ export default function EditListingPage() {
                 is_primary: img.is_primary,
             })));
 
-            // Set form values
             reset({
                 title: productData.title,
                 price: productData.price.toString(),
@@ -142,6 +146,22 @@ export default function EditListingPage() {
                 condition: productData.condition,
                 specs: productData.specs as Record<string, unknown>,
             });
+
+            // Load existing shipping options
+            try {
+                const productShipping = await shippingApi.getProductShipping(productId);
+                setExistingShipping(productShipping);
+                // Convert to SelectedShipping format
+                setSelectedShipping(productShipping.map(ps => ({
+                    shipping_option_id: ps.shipping_option_id || undefined,
+                    custom_price: ps.custom_price || undefined,
+                    name: ps.name,
+                    price: ps.price,
+                    is_collection: ps.is_collection,
+                })));
+            } catch (err) {
+                console.error('Failed to load shipping options:', err);
+            }
         } catch (error) {
             console.error('Failed to load product:', error);
             alert('Failed to load product');
@@ -191,6 +211,30 @@ export default function EditListingPage() {
             if (newImages.length > 0) {
                 const files = newImages.map(img => img.file!);
                 await uploadsApi.uploadMultiple(productId, files);
+            }
+
+            // Update shipping options
+            // First, remove old shipping that's no longer selected
+            for (const existing of existingShipping) {
+                const stillSelected = selectedShipping.some(
+                    s => s.shipping_option_id === existing.shipping_option_id
+                );
+                if (!stillSelected) {
+                    await shippingApi.removeShipping(existing.id);
+                }
+            }
+
+            // Add new shipping options
+            for (const shipping of selectedShipping) {
+                const isExisting = existingShipping.some(
+                    e => e.shipping_option_id === shipping.shipping_option_id
+                );
+                if (!isExisting) {
+                    await shippingApi.assignShipping(productId, {
+                        shipping_option_id: shipping.shipping_option_id,
+                        custom_price: shipping.custom_price,
+                    });
+                }
             }
 
             setSuccess(true);
@@ -449,6 +493,21 @@ export default function EditListingPage() {
                         </div>
                     </div>
                 ))}
+
+                {/* Shipping Options */}
+                <div
+                    className="rounded-xl border p-6"
+                    style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
+                >
+                    <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                        Shipping Options
+                    </h2>
+                    <ShippingSelector
+                        productId={productId}
+                        onShippingSelected={setSelectedShipping}
+                        initialSelection={selectedShipping}
+                    />
+                </div>
 
                 {/* Submit */}
                 <div className="flex justify-end gap-4">

@@ -4,17 +4,19 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Product, Category, Auction } from '@/types';
-import { productsApi, categoriesApi, uploadsApi, usersApi, messagesApi, wishlistApi, reportsApi, ProductImage, User } from '@/lib/api';
+import { productsApi, categoriesApi, uploadsApi, usersApi, messagesApi, wishlistApi, reportsApi, ratingsApi, ProductImage, User, SellerStats, SellerRating } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/Button';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
-import { FiArrowLeft, FiShare2, FiHeart, FiMessageCircle, FiClock, FiMapPin, FiUser, FiX, FiFlag } from 'react-icons/fi';
+import { RatingModal } from '@/components/RatingModal';
+import { FiArrowLeft, FiShare2, FiHeart, FiMessageCircle, FiClock, FiMapPin, FiUser, FiX, FiFlag, FiStar } from 'react-icons/fi';
 import { BsLaptop, BsCpu, BsGpuCard } from 'react-icons/bs';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { RecentlyViewed } from '@/components/RecentlyViewed';
 import { SimilarProducts } from '@/components/SimilarProducts';
 import { BidPanel } from '@/components/BidPanel';
+import { ShippingDisplay } from '@/components/ShippingDisplay';
 import { auctionsApi } from '@/lib/api';
 
 const categoryIcons: Record<number, React.ReactNode> = {
@@ -71,6 +73,9 @@ export default function ProductDetailPage() {
     const [reportSuccess, setReportSuccess] = useState(false);
     const [reportError, setReportError] = useState<string | null>(null);
     const [auction, setAuction] = useState<Auction | null>(null);
+    const [sellerStats, setSellerStats] = useState<SellerStats | null>(null);
+    const [showRatingModal, setShowRatingModal] = useState(false);
+    const [existingRating, setExistingRating] = useState<SellerRating | null>(null);
 
     useEffect(() => {
         if (params.id) {
@@ -121,6 +126,24 @@ export default function ProductDetailPage() {
                 .catch(console.error);
         }
     }, [product]);
+
+    // Fetch seller rating stats
+    useEffect(() => {
+        if (seller) {
+            ratingsApi.getSellerStats(seller.id)
+                .then(setSellerStats)
+                .catch(console.error);
+        }
+    }, [seller]);
+
+    // Check if user has already rated this seller
+    useEffect(() => {
+        if (user && seller && product) {
+            ratingsApi.getMyRating(seller.id, product.id)
+                .then(setExistingRating)
+                .catch(() => setExistingRating(null));
+        }
+    }, [user, seller, product]);
 
     // Recently viewed tracking
     const { recentItems, addToRecentlyViewed, removeFromRecentlyViewed, clearRecentlyViewed } = useRecentlyViewed();
@@ -378,23 +401,7 @@ export default function ProductDetailPage() {
                             {/* Shipping Info */}
                             <div className="space-y-3">
                                 <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Shipping</h3>
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <span className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</span>
-                                        <span style={{ color: 'var(--text-secondary)' }}>Standard courier shipping from </span>
-                                        <span className="text-blue-500 font-medium">R45</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <span className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</span>
-                                        <span style={{ color: 'var(--text-secondary)' }}>Free collection from </span>
-                                        <span className="text-blue-500 font-medium">Johannesburg</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <span className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</span>
-                                        <span style={{ color: 'var(--text-secondary)' }}>Ready to ship in </span>
-                                        <span className="text-blue-500 font-medium">3 business days</span>
-                                    </div>
-                                </div>
+                                <ShippingDisplay productId={product.id} />
                             </div>
 
                             {/* Seller Info */}
@@ -419,12 +426,22 @@ export default function ProductDetailPage() {
                                                 {seller?.full_name || seller?.username || 'Seller'}
                                             </span>
                                             {seller?.is_verified_seller && <VerifiedBadge size="sm" />}
-                                            <div className="flex items-center gap-1 text-yellow-500">
-                                                <span>★</span>
-                                                <span className="text-sm">165</span>
-                                            </div>
+                                            {sellerStats && sellerStats.total_ratings > 0 && (
+                                                <div className="flex items-center gap-1 text-yellow-500">
+                                                    <span>★</span>
+                                                    <span className="text-sm">{sellerStats.total_ratings}</span>
+                                                </div>
+                                            )}
                                         </div>
-                                        <span className="text-sm text-green-500">98.5% Positive ratings</span>
+                                        {sellerStats && sellerStats.total_ratings > 0 ? (
+                                            <span className="text-sm text-green-500">
+                                                {sellerStats.positive_percentage}% Positive ratings
+                                            </span>
+                                        ) : (
+                                            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                                                No ratings yet
+                                            </span>
+                                        )}
                                     </div>
                                 </Link>
                                 <button
@@ -441,6 +458,18 @@ export default function ProductDetailPage() {
                                     <FiMessageCircle className="w-4 h-4" />
                                     Ask the seller a question
                                 </button>
+
+                                {/* Rate Seller Button */}
+                                {user && seller && user.id !== seller.id && (
+                                    <button
+                                        onClick={() => setShowRatingModal(true)}
+                                        className="flex items-center gap-2 mt-2 text-sm transition-colors hover:text-yellow-500"
+                                        style={{ color: 'var(--text-muted)' }}
+                                    >
+                                        <FiStar className={`w-4 h-4 ${existingRating ? 'fill-current text-yellow-500' : ''}`} />
+                                        {existingRating ? 'Update your rating' : 'Rate this seller'}
+                                    </button>
+                                )}
                             </div>
 
                             {/* Payment Option */}
@@ -753,6 +782,25 @@ export default function ProductDetailPage() {
                         )}
                     </div>
                 </div>
+            )}
+
+            {/* Rating Modal */}
+            {showRatingModal && seller && product && (
+                <RatingModal
+                    sellerId={seller.id}
+                    sellerName={seller.full_name || seller.username || 'Seller'}
+                    productId={product.id}
+                    productTitle={product.title}
+                    existingRating={existingRating}
+                    onClose={() => setShowRatingModal(false)}
+                    onSuccess={(newRating) => {
+                        setExistingRating(newRating);
+                        // Refresh seller stats
+                        ratingsApi.getSellerStats(seller.id)
+                            .then(setSellerStats)
+                            .catch(console.error);
+                    }}
+                />
             )}
         </div>
     );

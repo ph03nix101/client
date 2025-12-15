@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Header } from '@/components/Header';
-import { FiHome, FiList, FiUser, FiSettings, FiPlus, FiShield, FiMessageCircle, FiHeart } from 'react-icons/fi';
+import { FiHome, FiList, FiUser, FiSettings, FiPlus, FiShield, FiMessageCircle, FiHeart, FiTruck, FiShoppingBag } from 'react-icons/fi';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -12,8 +12,10 @@ interface DashboardLayoutProps {
 const navItems = [
     { href: '/dashboard', label: 'Overview', icon: FiHome },
     { href: '/dashboard/listings', label: 'My Listings', icon: FiList },
+    { href: '/dashboard/sales', label: 'My Sales', icon: FiShoppingBag },
     { href: '/dashboard/messages', label: 'Messages', icon: FiMessageCircle },
     { href: '/dashboard/wishlist', label: 'Wishlist', icon: FiHeart },
+    { href: '/dashboard/shipping', label: 'Shipping', icon: FiTruck },
     { href: '/dashboard/verification', label: 'Verification', icon: FiShield },
     { href: '/dashboard/profile', label: 'Profile', icon: FiUser },
     { href: '/dashboard/settings', label: 'Settings', icon: FiSettings },

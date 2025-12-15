@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { Category, CategoryAttribute, CreateProductPayload } from '@/types';
-import { categoriesApi, productsApi, uploadsApi, auctionsApi } from '@/lib/api';
+import { categoriesApi, productsApi, uploadsApi, auctionsApi, shippingApi } from '@/lib/api';
+import { ShippingSelector, SelectedShipping } from '@/components/ShippingSelector';
 import { useAuth } from '@/components/AuthProvider';
 import { Header } from '@/components/Header';
 import { CategorySelector } from '@/components/CategorySelector';
@@ -66,6 +67,7 @@ export default function CreateListingPage() {
     const [auctionDuration, setAuctionDuration] = useState(72); // Default 3 days
     const [reservePrice, setReservePrice] = useState('');
     const [buyNowPrice, setBuyNowPrice] = useState('');
+    const [selectedShipping, setSelectedShipping] = useState<SelectedShipping[]>([]);
 
     // Redirect to login if not authenticated
     useEffect(() => {
@@ -137,6 +139,14 @@ export default function CreateListingPage() {
                     reservePrice ? parseFloat(reservePrice) : undefined,
                     buyNowPrice ? parseFloat(buyNowPrice) : undefined
                 );
+            }
+
+            // Assign shipping options
+            for (const shipping of selectedShipping) {
+                await shippingApi.assignShipping(product.id, {
+                    shipping_option_id: shipping.shipping_option_id,
+                    custom_price: shipping.custom_price,
+                });
             }
 
             setSuccess(true);
@@ -454,6 +464,20 @@ export default function CreateListingPage() {
                                 })()}
                             </>
                         )}
+
+                        {/* Shipping Options */}
+                        <div
+                            className="rounded-xl border p-6"
+                            style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
+                        >
+                            <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                                Shipping Options
+                            </h3>
+                            <ShippingSelector
+                                onShippingSelected={setSelectedShipping}
+                                initialSelection={selectedShipping}
+                            />
+                        </div>
 
                         {/* Submit Button */}
                         <div className="flex justify-end gap-4">
