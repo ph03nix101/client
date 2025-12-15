@@ -10,7 +10,7 @@ import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/Button';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { RatingModal } from '@/components/RatingModal';
-import { FiArrowLeft, FiShare2, FiHeart, FiMessageCircle, FiClock, FiMapPin, FiUser, FiX, FiFlag, FiStar } from 'react-icons/fi';
+import { FiArrowLeft, FiShare2, FiHeart, FiMessageCircle, FiClock, FiMapPin, FiUser, FiX, FiFlag, FiStar, FiEdit2 } from 'react-icons/fi';
 import { BsLaptop, BsCpu, BsGpuCard } from 'react-icons/bs';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { RecentlyViewed } from '@/components/RecentlyViewed';
@@ -288,506 +288,526 @@ export default function ProductDetailPage() {
                         {/* Product Info */}
                         <div className="space-y-5">
                             {/* Title */}
-                            <div>
-                                <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                            <div className="flex items-center justify-between gap-4">
+                                <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                                     {product.title}
                                 </h1>
-                                <div className="flex items-center gap-3">
-                                    <span
-                                        className="text-xs font-medium px-2.5 py-1 rounded border"
-                                        style={{
-                                            borderColor: 'var(--border)',
-                                            color: 'var(--text-secondary)',
-                                        }}
+                                {user && user.id === product.seller_id && (
+                                    <Link
+                                        href={`/dashboard/listings/${product.id}`}
+                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
                                     >
-                                        {product.condition || 'New'}
-                                    </span>
-                                    <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                                        {product.status === 'Active' ? 'Available' : product.status}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Indicative Price */}
-                            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                                Indicative market price:{' '}
-                                <span className="line-through">
-                                    R{Math.round(parseFloat(product.price) * 1.2).toLocaleString()}
-                                </span>
-                            </div>
-
-                            {/* Price Section */}
-                            {product.status === 'Auction' && auction ? (
-                                <div className="mb-4">
-                                    <BidPanel
-                                        auction={auction}
-                                        productSellerId={product.seller_id}
-                                        onBidPlaced={(updated) => setAuction(updated)}
-                                    />
-                                </div>
-                            ) : (
-                                <div className="flex items-baseline gap-3">
-                                    <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                                        R{parseFloat(product.price).toLocaleString()}
-                                    </span>
-                                    <span className="text-lg font-semibold text-green-500">
-                                        17% off
-                                    </span>
-                                </div>
-                            )}
-
-                            {/* Contact Supplier */}
-                            {product.status !== 'Auction' && (
-                                <button
-                                    onClick={() => {
-                                        if (!user) {
-                                            router.push('/login?redirect=' + encodeURIComponent(`/product/${product.id}`));
-                                            return;
-                                        }
-                                        setShowMessageModal(true);
-                                    }}
-                                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-colors"
-                                >
-                                    <FiMessageCircle className="w-5 h-5" />
-                                    Contact Supplier
-                                </button>
-                            )}
-
-                            {/* Share & Watchlist */}
-                            <div
-                                className="flex items-center justify-between pb-4 border-b"
-                                style={{ borderColor: 'var(--border)' }}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Share</span>
-                                    <div className="flex items-center gap-1.5">
-                                        {['X', 'f', 'P', 'in', 'W', '✉', '📋'].map((icon, i) => (
-                                            <button
-                                                key={i}
-                                                className="w-7 h-7 rounded-full border flex items-center justify-center text-xs hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                                                style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
-                                            >
-                                                {icon}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={async () => {
-                                        if (!user) {
-                                            router.push('/login?redirect=' + encodeURIComponent(`/product/${product?.id}`));
-                                            return;
-                                        }
-                                        if (!product) return;
-                                        setWishlistLoading(true);
-                                        try {
-                                            const result = await wishlistApi.toggleWishlist(product.id);
-                                            setIsInWishlist(result.added);
-                                        } catch (err) {
-                                            console.error('Failed to toggle wishlist:', err);
-                                        } finally {
-                                            setWishlistLoading(false);
-                                        }
-                                    }}
-                                    disabled={wishlistLoading}
-                                    className={`flex items-center gap-2 text-sm transition-colors ${isInWishlist ? 'text-red-500' : ''}`}
-                                    style={{ color: isInWishlist ? undefined : 'var(--text-muted)' }}
-                                >
-                                    <FiHeart className={`w-4 h-4 ${isInWishlist ? 'fill-current' : ''}`} />
-                                    {isInWishlist ? 'Added to watchlist' : 'Add to watchlist'}
-                                </button>
-                            </div>
-
-                            {/* Shipping Info */}
-                            <div className="space-y-3">
-                                <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Shipping</h3>
-                                <ShippingDisplay productId={product.id} />
-                            </div>
-
-                            {/* Seller Info */}
-                            <div className="pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
-                                <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Seller</h3>
-                                <Link
-                                    href={seller ? `/seller/${seller.id}` : '#'}
-                                    className="flex items-center gap-3 group"
-                                >
-                                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                                        {seller?.avatar_url ? (
-                                            <img src={seller.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />
-                                        ) : (
-                                            <span className="text-blue-600 dark:text-blue-400 font-bold text-lg">
-                                                {seller?.full_name?.charAt(0).toUpperCase() || 'S'}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium text-blue-500 group-hover:underline">
-                                                {seller?.full_name || seller?.username || 'Seller'}
-                                            </span>
-                                            {seller?.is_verified_seller && <VerifiedBadge size="sm" />}
-                                            {sellerStats && sellerStats.total_ratings > 0 && (
-                                                <div className="flex items-center gap-1 text-yellow-500">
-                                                    <span>★</span>
-                                                    <span className="text-sm">{sellerStats.total_ratings}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        {sellerStats && sellerStats.total_ratings > 0 ? (
-                                            <span className="text-sm text-green-500">
-                                                {sellerStats.positive_percentage}% Positive ratings
-                                            </span>
-                                        ) : (
-                                            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                                                No ratings yet
-                                            </span>
-                                        )}
-                                    </div>
-                                </Link>
-                                <button
-                                    onClick={() => {
-                                        if (!user) {
-                                            router.push('/login?redirect=' + encodeURIComponent(`/product/${product.id}`));
-                                            return;
-                                        }
-                                        setShowMessageModal(true);
-                                    }}
-                                    className="flex items-center gap-2 mt-3 text-sm transition-colors hover:text-blue-500"
-                                    style={{ color: 'var(--text-muted)' }}
-                                >
-                                    <FiMessageCircle className="w-4 h-4" />
-                                    Ask the seller a question
-                                </button>
-
-                                {/* Rate Seller Button */}
-                                {user && seller && user.id !== seller.id && (
-                                    <button
-                                        onClick={() => setShowRatingModal(true)}
-                                        className="flex items-center gap-2 mt-2 text-sm transition-colors hover:text-yellow-500"
-                                        style={{ color: 'var(--text-muted)' }}
-                                    >
-                                        <FiStar className={`w-4 h-4 ${existingRating ? 'fill-current text-yellow-500' : ''}`} />
-                                        {existingRating ? 'Update your rating' : 'Rate this seller'}
-                                    </button>
+                                        <FiEdit2 className="w-4 h-4" />
+                                        Edit
+                                    </Link>
                                 )}
                             </div>
+                            <div className="flex items-center gap-3">
+                                <span
+                                    className="text-xs font-medium px-2.5 py-1 rounded border"
+                                    style={{
+                                        borderColor: 'var(--border)',
+                                        color: 'var(--text-secondary)',
+                                    }}
+                                >
+                                    {product.condition || 'New'}
+                                </span>
+                                <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                                    {product.status === 'Active' ? 'Available' : product.status}
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                {/* Product Details Section */}
-                <div
-                    className="rounded-lg border p-6 mb-8"
-                    style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
-                >
-                    <h2 className="text-xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Product details</h2>
+                        {/* Indicative Price */}
+                        <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                            Indicative market price:{' '}
+                            <span className="line-through">
+                                R{Math.round(parseFloat(product.price) * 1.2).toLocaleString()}
+                            </span>
+                        </div>
 
-                    {/* Details Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div>
-                            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Condition</span>
-                            <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{product.condition || 'New'}</p>
-                        </div>
-                        <div>
-                            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Location</span>
-                            <p className="font-medium" style={{ color: 'var(--text-primary)' }}>South Africa</p>
-                        </div>
-                        <div>
-                            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Product code</span>
-                            <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{product.id.slice(0, 8).toUpperCase()}</p>
-                        </div>
-                        <div>
-                            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>TechFinder ID</span>
-                            <p className="font-medium" style={{ color: 'var(--text-primary)' }}>66260{product.id.slice(-4)}87</p>
-                        </div>
-                    </div>
-
-                    {/* Description & Features */}
-                    <div className="border-t pt-6" style={{ borderColor: 'var(--border)' }}>
-                        {product.description && (
-                            <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>{product.description}</p>
+                        {/* Price Section */}
+                        {product.status === 'Auction' && auction ? (
+                            <div className="mb-4">
+                                <BidPanel
+                                    auction={auction}
+                                    productSellerId={product.seller_id}
+                                    onBidPlaced={(updated) => setAuction(updated)}
+                                />
+                            </div>
+                        ) : (
+                            <div className="flex items-baseline gap-3">
+                                <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                                    R{parseFloat(product.price).toLocaleString()}
+                                </span>
+                                <span className="text-lg font-semibold text-green-500">
+                                    17% off
+                                </span>
+                            </div>
                         )}
 
-                        {Object.keys(specs).length > 0 && (
-                            <>
-                                <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Key Features:</h3>
-                                <ul className="space-y-2">
-                                    {Object.entries(specs).map(([key, value]) => {
-                                        if (value === null || value === undefined || value === '') return null;
-                                        const label = specLabels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                                        let displayValue = String(value);
-                                        if (typeof value === 'boolean') {
-                                            displayValue = value ? 'Yes' : 'No';
-                                        }
-                                        return (
-                                            <li key={key} className="flex items-start gap-2">
-                                                <span className="text-blue-500 font-bold">•</span>
-                                                <span style={{ color: 'var(--text-secondary)' }}>
-                                                    <strong style={{ color: 'var(--text-primary)' }}>{label}:</strong> {displayValue}
-                                                </span>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            </>
-                        )}
-                    </div>
-
-                    {/* Report Link */}
-                    <div className="mt-6 text-right">
-                        {user && product && user.id !== product.seller_id && (
+                        {/* Contact Supplier */}
+                        {product.status !== 'Auction' && (
                             <button
-                                onClick={() => setShowReportModal(true)}
-                                className="text-sm text-blue-500 hover:underline"
+                                onClick={() => {
+                                    if (!user) {
+                                        router.push('/login?redirect=' + encodeURIComponent(`/product/${product.id}`));
+                                        return;
+                                    }
+                                    setShowMessageModal(true);
+                                }}
+                                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-colors"
                             >
-                                Report a problem
+                                <FiMessageCircle className="w-5 h-5" />
+                                Contact Supplier
                             </button>
                         )}
+
+                        {/* Share & Watchlist */}
+                        <div
+                            className="flex items-center justify-between pb-4 border-b"
+                            style={{ borderColor: 'var(--border)' }}
+                        >
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Share</span>
+                                <div className="flex items-center gap-1.5">
+                                    {['X', 'f', 'P', 'in', 'W', '✉', '📋'].map((icon, i) => (
+                                        <button
+                                            key={i}
+                                            className="w-7 h-7 rounded-full border flex items-center justify-center text-xs hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                            style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
+                                        >
+                                            {icon}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <button
+                                onClick={async () => {
+                                    if (!user) {
+                                        router.push('/login?redirect=' + encodeURIComponent(`/product/${product?.id}`));
+                                        return;
+                                    }
+                                    if (!product) return;
+                                    setWishlistLoading(true);
+                                    try {
+                                        const result = await wishlistApi.toggleWishlist(product.id);
+                                        setIsInWishlist(result.added);
+                                    } catch (err) {
+                                        console.error('Failed to toggle wishlist:', err);
+                                    } finally {
+                                        setWishlistLoading(false);
+                                    }
+                                }}
+                                disabled={wishlistLoading}
+                                className={`flex items-center gap-2 text-sm transition-colors ${isInWishlist ? 'text-red-500' : ''}`}
+                                style={{ color: isInWishlist ? undefined : 'var(--text-muted)' }}
+                            >
+                                <FiHeart className={`w-4 h-4 ${isInWishlist ? 'fill-current' : ''}`} />
+                                {isInWishlist ? 'Added to watchlist' : 'Add to watchlist'}
+                            </button>
+                        </div>
+
+                        {/* Shipping Info */}
+                        <div className="space-y-3">
+                            <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Shipping</h3>
+                            <ShippingDisplay productId={product.id} />
+                        </div>
+
+                        {/* Seller Info */}
+                        <div className="pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
+                            <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Seller</h3>
+                            <Link
+                                href={seller ? `/seller/${seller.id}` : '#'}
+                                className="flex items-center gap-3 group"
+                            >
+                                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                                    {seller?.avatar_url ? (
+                                        <img src={seller.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />
+                                    ) : (
+                                        <span className="text-blue-600 dark:text-blue-400 font-bold text-lg">
+                                            {seller?.full_name?.charAt(0).toUpperCase() || 'S'}
+                                        </span>
+                                    )}
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-medium text-blue-500 group-hover:underline">
+                                            {seller?.full_name || seller?.username || 'Seller'}
+                                        </span>
+                                        {seller?.is_verified_seller && <VerifiedBadge size="sm" />}
+                                        {sellerStats && sellerStats.total_ratings > 0 && (
+                                            <div className="flex items-center gap-1 text-yellow-500">
+                                                <span>★</span>
+                                                <span className="text-sm">{sellerStats.total_ratings}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {sellerStats && sellerStats.total_ratings > 0 ? (
+                                        <span className="text-sm text-green-500">
+                                            {sellerStats.positive_percentage}% Positive ratings
+                                        </span>
+                                    ) : (
+                                        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                                            No ratings yet
+                                        </span>
+                                    )}
+                                </div>
+                            </Link>
+                            <button
+                                onClick={() => {
+                                    if (!user) {
+                                        router.push('/login?redirect=' + encodeURIComponent(`/product/${product.id}`));
+                                        return;
+                                    }
+                                    setShowMessageModal(true);
+                                }}
+                                className="flex items-center gap-2 mt-3 text-sm transition-colors hover:text-blue-500"
+                                style={{ color: 'var(--text-muted)' }}
+                            >
+                                <FiMessageCircle className="w-4 h-4" />
+                                Ask the seller a question
+                            </button>
+
+                            {/* Rate Seller Button */}
+                            {user && seller && user.id !== seller.id && (
+                                <button
+                                    onClick={() => setShowRatingModal(true)}
+                                    className="flex items-center gap-2 mt-2 text-sm transition-colors hover:text-yellow-500"
+                                    style={{ color: 'var(--text-muted)' }}
+                                >
+                                    <FiStar className={`w-4 h-4 ${existingRating ? 'fill-current text-yellow-500' : ''}`} />
+                                    {existingRating ? 'Update your rating' : 'Rate this seller'}
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Similar Products Section */}
-            {product && (
-                <div className="max-w-7xl mx-auto px-4 py-8 mt-8">
-                    <SimilarProducts productId={product.id} categoryId={product.category_id} />
-                </div>
-            )}
+            {/* Product Details Section */}
+            <div
+                className="rounded-lg border p-6 mb-8"
+                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
+            >
+                <h2 className="text-xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Product details</h2>
 
-            {/* Recently Viewed Section */}
-            {recentItems.length > 1 && (
-                <div className="max-w-7xl mx-auto px-4 py-8 mt-8">
-                    <RecentlyViewed
-                        items={recentItems}
-                        currentProductId={product?.id}
-                        onRemove={removeFromRecentlyViewed}
-                        onClear={clearRecentlyViewed}
-                        maxDisplay={6}
-                    />
+                {/* Details Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div>
+                        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Condition</span>
+                        <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{product.condition || 'New'}</p>
+                    </div>
+                    <div>
+                        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Location</span>
+                        <p className="font-medium" style={{ color: 'var(--text-primary)' }}>South Africa</p>
+                    </div>
+                    <div>
+                        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Product code</span>
+                        <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{product.id.slice(0, 8).toUpperCase()}</p>
+                    </div>
+                    <div>
+                        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>TechFinder ID</span>
+                        <p className="font-medium" style={{ color: 'var(--text-primary)' }}>66260{product.id.slice(-4)}87</p>
+                    </div>
                 </div>
-            )}
 
-            {/* Message Modal */}
-            {showMessageModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div
-                        className="rounded-xl border max-w-md w-full"
-                        style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
-                    >
-                        <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--border)' }}>
-                            <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-                                Contact Seller
-                            </h3>
+                {/* Description & Features */}
+                <div className="border-t pt-6" style={{ borderColor: 'var(--border)' }}>
+                    {product.description && (
+                        <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>{product.description}</p>
+                    )}
+
+                    {Object.keys(specs).length > 0 && (
+                        <>
+                            <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Key Features:</h3>
+                            <ul className="space-y-2">
+                                {Object.entries(specs).map(([key, value]) => {
+                                    if (value === null || value === undefined || value === '') return null;
+                                    const label = specLabels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                    let displayValue = String(value);
+                                    if (typeof value === 'boolean') {
+                                        displayValue = value ? 'Yes' : 'No';
+                                    }
+                                    return (
+                                        <li key={key} className="flex items-start gap-2">
+                                            <span className="text-blue-500 font-bold">•</span>
+                                            <span style={{ color: 'var(--text-secondary)' }}>
+                                                <strong style={{ color: 'var(--text-primary)' }}>{label}:</strong> {displayValue}
+                                            </span>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </>
+                    )}
+                </div>
+
+                {/* Report Link */}
+                <div className="mt-6 text-right">
+                    {user && product && user.id !== product.seller_id && (
+                        <button
+                            onClick={() => setShowReportModal(true)}
+                            className="text-sm text-blue-500 hover:underline"
+                        >
+                            Report a problem
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+
+            {/* Similar Products Section */ }
+    {
+        product && (
+            <div className="max-w-7xl mx-auto px-4 py-8 mt-8">
+                <SimilarProducts productId={product.id} categoryId={product.category_id} />
+            </div>
+        )
+    }
+
+    {/* Recently Viewed Section */ }
+    {
+        recentItems.length > 1 && (
+            <div className="max-w-7xl mx-auto px-4 py-8 mt-8">
+                <RecentlyViewed
+                    items={recentItems}
+                    currentProductId={product?.id}
+                    onRemove={removeFromRecentlyViewed}
+                    onClear={clearRecentlyViewed}
+                    maxDisplay={6}
+                />
+            </div>
+        )
+    }
+
+    {/* Message Modal */ }
+    {
+        showMessageModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div
+                    className="rounded-xl border max-w-md w-full"
+                    style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
+                >
+                    <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--border)' }}>
+                        <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                            Contact Seller
+                        </h3>
+                        <button
+                            onClick={() => setShowMessageModal(false)}
+                            className="p-2 rounded-lg hover:bg-opacity-80 transition-colors"
+                            style={{ backgroundColor: 'var(--bg-tertiary)' }}
+                        >
+                            <FiX className="w-5 h-5" style={{ color: 'var(--text-primary)' }} />
+                        </button>
+                    </div>
+
+                    <div className="p-4">
+                        <p className="text-sm mb-2" style={{ color: 'var(--text-muted)' }}>
+                            About: <strong style={{ color: 'var(--text-primary)' }}>{product?.title}</strong>
+                        </p>
+                        <textarea
+                            value={messageText}
+                            onChange={(e) => setMessageText(e.target.value)}
+                            placeholder={`Hi, I'm interested in your ${product?.title}. Is it still available?`}
+                            className="w-full px-4 py-3 rounded-lg border resize-none focus:ring-2 focus:ring-blue-500"
+                            style={{
+                                backgroundColor: 'var(--input-bg)',
+                                borderColor: 'var(--border)',
+                                color: 'var(--text-primary)'
+                            }}
+                            rows={4}
+                        />
+                    </div>
+
+                    <div className="flex gap-3 p-4 border-t" style={{ borderColor: 'var(--border)' }}>
+                        <button
+                            onClick={() => setShowMessageModal(false)}
+                            className="flex-1 py-2.5 rounded-lg border font-medium transition-colors"
+                            style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={async () => {
+                                if (!messageText.trim() || !product) return;
+                                setSendingMessage(true);
+                                try {
+                                    const conv = await messagesApi.startConversation(product.id, messageText.trim());
+                                    router.push(`/dashboard/messages/${conv.id}`);
+                                } catch (err) {
+                                    console.error('Failed to send message:', err);
+                                    alert('Failed to send message. Please try again.');
+                                } finally {
+                                    setSendingMessage(false);
+                                }
+                            }}
+                            disabled={!messageText.trim() || sendingMessage}
+                            className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        >
+                            {sendingMessage ? 'Sending...' : 'Send Message'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    {/* Report Modal */ }
+    {
+        showReportModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div
+                    className="rounded-xl border max-w-md w-full"
+                    style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
+                >
+                    <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--border)' }}>
+                        <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Report Listing</h3>
+                        <button
+                            onClick={() => {
+                                setShowReportModal(false);
+                                setReportReason('');
+                                setReportDescription('');
+                                setReportError(null);
+                                setReportSuccess(false);
+                            }}
+                            className="p-2 rounded-lg hover:bg-gray-500/20 transition-colors"
+                        >
+                            <FiX className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+                        </button>
+                    </div>
+
+                    {reportSuccess ? (
+                        <div className="p-6 text-center">
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/10 flex items-center justify-center">
+                                <FiFlag className="w-8 h-8 text-green-500" />
+                            </div>
+                            <h4 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Report Submitted</h4>
+                            <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
+                                Thank you for your report. Our team will review this listing.
+                            </p>
                             <button
-                                onClick={() => setShowMessageModal(false)}
-                                className="p-2 rounded-lg hover:bg-opacity-80 transition-colors"
-                                style={{ backgroundColor: 'var(--bg-tertiary)' }}
+                                onClick={() => {
+                                    setShowReportModal(false);
+                                    setReportSuccess(false);
+                                }}
+                                className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
                             >
-                                <FiX className="w-5 h-5" style={{ color: 'var(--text-primary)' }} />
+                                Close
                             </button>
                         </div>
-
+                    ) : (
                         <div className="p-4">
-                            <p className="text-sm mb-2" style={{ color: 'var(--text-muted)' }}>
-                                About: <strong style={{ color: 'var(--text-primary)' }}>{product?.title}</strong>
+                            <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
+                                Help us understand what's wrong with this listing.
                             </p>
-                            <textarea
-                                value={messageText}
-                                onChange={(e) => setMessageText(e.target.value)}
-                                placeholder={`Hi, I'm interested in your ${product?.title}. Is it still available?`}
-                                className="w-full px-4 py-3 rounded-lg border resize-none focus:ring-2 focus:ring-blue-500"
+
+                            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                                Reason for reporting *
+                            </label>
+                            <select
+                                value={reportReason}
+                                onChange={(e) => setReportReason(e.target.value)}
+                                className="w-full px-3 py-2.5 rounded-lg border mb-4"
                                 style={{
                                     backgroundColor: 'var(--input-bg)',
                                     borderColor: 'var(--border)',
                                     color: 'var(--text-primary)'
                                 }}
-                                rows={4}
+                            >
+                                <option value="">Select a reason</option>
+                                <option value="spam">Spam or misleading</option>
+                                <option value="fraud">Suspected fraud or scam</option>
+                                <option value="inappropriate">Inappropriate content</option>
+                                <option value="counterfeit">Counterfeit product</option>
+                                <option value="other">Other</option>
+                            </select>
+
+                            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                                Additional details (optional)
+                            </label>
+                            <textarea
+                                value={reportDescription}
+                                onChange={(e) => setReportDescription(e.target.value)}
+                                placeholder="Provide more details about the issue..."
+                                rows={3}
+                                className="w-full px-3 py-2.5 rounded-lg border resize-none"
+                                style={{
+                                    backgroundColor: 'var(--input-bg)',
+                                    borderColor: 'var(--border)',
+                                    color: 'var(--text-primary)'
+                                }}
                             />
-                        </div>
 
-                        <div className="flex gap-3 p-4 border-t" style={{ borderColor: 'var(--border)' }}>
-                            <button
-                                onClick={() => setShowMessageModal(false)}
-                                className="flex-1 py-2.5 rounded-lg border font-medium transition-colors"
-                                style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    if (!messageText.trim() || !product) return;
-                                    setSendingMessage(true);
-                                    try {
-                                        const conv = await messagesApi.startConversation(product.id, messageText.trim());
-                                        router.push(`/dashboard/messages/${conv.id}`);
-                                    } catch (err) {
-                                        console.error('Failed to send message:', err);
-                                        alert('Failed to send message. Please try again.');
-                                    } finally {
-                                        setSendingMessage(false);
-                                    }
-                                }}
-                                disabled={!messageText.trim() || sendingMessage}
-                                className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-                            >
-                                {sendingMessage ? 'Sending...' : 'Send Message'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                            {reportError && (
+                                <p className="text-red-500 text-sm mt-2">{reportError}</p>
+                            )}
 
-            {/* Report Modal */}
-            {showReportModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div
-                        className="rounded-xl border max-w-md w-full"
-                        style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
-                    >
-                        <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--border)' }}>
-                            <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Report Listing</h3>
-                            <button
-                                onClick={() => {
-                                    setShowReportModal(false);
-                                    setReportReason('');
-                                    setReportDescription('');
-                                    setReportError(null);
-                                    setReportSuccess(false);
-                                }}
-                                className="p-2 rounded-lg hover:bg-gray-500/20 transition-colors"
-                            >
-                                <FiX className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-                            </button>
-                        </div>
-
-                        {reportSuccess ? (
-                            <div className="p-6 text-center">
-                                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/10 flex items-center justify-center">
-                                    <FiFlag className="w-8 h-8 text-green-500" />
-                                </div>
-                                <h4 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Report Submitted</h4>
-                                <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
-                                    Thank you for your report. Our team will review this listing.
-                                </p>
+                            <div className="flex gap-3 mt-4">
                                 <button
                                     onClick={() => {
                                         setShowReportModal(false);
-                                        setReportSuccess(false);
+                                        setReportReason('');
+                                        setReportDescription('');
+                                        setReportError(null);
                                     }}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+                                    className="flex-1 py-2.5 rounded-lg border font-medium"
+                                    style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                                 >
-                                    Close
+                                    Cancel
                                 </button>
-                            </div>
-                        ) : (
-                            <div className="p-4">
-                                <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
-                                    Help us understand what's wrong with this listing.
-                                </p>
-
-                                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-                                    Reason for reporting *
-                                </label>
-                                <select
-                                    value={reportReason}
-                                    onChange={(e) => setReportReason(e.target.value)}
-                                    className="w-full px-3 py-2.5 rounded-lg border mb-4"
-                                    style={{
-                                        backgroundColor: 'var(--input-bg)',
-                                        borderColor: 'var(--border)',
-                                        color: 'var(--text-primary)'
-                                    }}
-                                >
-                                    <option value="">Select a reason</option>
-                                    <option value="spam">Spam or misleading</option>
-                                    <option value="fraud">Suspected fraud or scam</option>
-                                    <option value="inappropriate">Inappropriate content</option>
-                                    <option value="counterfeit">Counterfeit product</option>
-                                    <option value="other">Other</option>
-                                </select>
-
-                                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-                                    Additional details (optional)
-                                </label>
-                                <textarea
-                                    value={reportDescription}
-                                    onChange={(e) => setReportDescription(e.target.value)}
-                                    placeholder="Provide more details about the issue..."
-                                    rows={3}
-                                    className="w-full px-3 py-2.5 rounded-lg border resize-none"
-                                    style={{
-                                        backgroundColor: 'var(--input-bg)',
-                                        borderColor: 'var(--border)',
-                                        color: 'var(--text-primary)'
-                                    }}
-                                />
-
-                                {reportError && (
-                                    <p className="text-red-500 text-sm mt-2">{reportError}</p>
-                                )}
-
-                                <div className="flex gap-3 mt-4">
-                                    <button
-                                        onClick={() => {
-                                            setShowReportModal(false);
+                                <button
+                                    onClick={async () => {
+                                        if (!reportReason) {
+                                            setReportError('Please select a reason');
+                                            return;
+                                        }
+                                        setReportSubmitting(true);
+                                        setReportError(null);
+                                        try {
+                                            await reportsApi.create(product!.id, reportReason, reportDescription || undefined);
+                                            setReportSuccess(true);
                                             setReportReason('');
                                             setReportDescription('');
-                                            setReportError(null);
-                                        }}
-                                        className="flex-1 py-2.5 rounded-lg border font-medium"
-                                        style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={async () => {
-                                            if (!reportReason) {
-                                                setReportError('Please select a reason');
-                                                return;
-                                            }
-                                            setReportSubmitting(true);
-                                            setReportError(null);
-                                            try {
-                                                await reportsApi.create(product!.id, reportReason, reportDescription || undefined);
-                                                setReportSuccess(true);
-                                                setReportReason('');
-                                                setReportDescription('');
-                                            } catch (err: any) {
-                                                setReportError(err.response?.data?.message || 'Failed to submit report');
-                                            } finally {
-                                                setReportSubmitting(false);
-                                            }
-                                        }}
-                                        disabled={!reportReason || reportSubmitting}
-                                        className="flex-1 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50"
-                                    >
-                                        {reportSubmitting ? 'Submitting...' : 'Submit Report'}
-                                    </button>
-                                </div>
+                                        } catch (err: any) {
+                                            setReportError(err.response?.data?.message || 'Failed to submit report');
+                                        } finally {
+                                            setReportSubmitting(false);
+                                        }
+                                    }}
+                                    disabled={!reportReason || reportSubmitting}
+                                    className="flex-1 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50"
+                                >
+                                    {reportSubmitting ? 'Submitting...' : 'Submit Report'}
+                                </button>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
-            )}
+            </div>
+        )
+    }
 
-            {/* Rating Modal */}
-            {showRatingModal && seller && product && (
-                <RatingModal
-                    sellerId={seller.id}
-                    sellerName={seller.full_name || seller.username || 'Seller'}
-                    productId={product.id}
-                    productTitle={product.title}
-                    existingRating={existingRating}
-                    onClose={() => setShowRatingModal(false)}
-                    onSuccess={(newRating) => {
-                        setExistingRating(newRating);
-                        // Refresh seller stats
-                        ratingsApi.getSellerStats(seller.id)
-                            .then(setSellerStats)
-                            .catch(console.error);
-                    }}
-                />
-            )}
-        </div>
+    {/* Rating Modal */ }
+    {
+        showRatingModal && seller && product && (
+            <RatingModal
+                sellerId={seller.id}
+                sellerName={seller.full_name || seller.username || 'Seller'}
+                productId={product.id}
+                productTitle={product.title}
+                existingRating={existingRating}
+                onClose={() => setShowRatingModal(false)}
+                onSuccess={(newRating) => {
+                    setExistingRating(newRating);
+                    // Refresh seller stats
+                    ratingsApi.getSellerStats(seller.id)
+                        .then(setSellerStats)
+                        .catch(console.error);
+                }}
+            />
+        )
+    }
+        </div >
     );
 }
