@@ -320,12 +320,14 @@ export default function ProductDetailPage() {
                             </div>
 
                             {/* Indicative Price */}
-                            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                                Indicative market price:{' '}
-                                <span className="line-through">
-                                    R{Math.round(parseFloat(product.price) * 1.2).toLocaleString()}
-                                </span>
-                            </div>
+                            {product.original_price && (
+                                <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                                    Original Price:{' '}
+                                    <span className="line-through">
+                                        R{Math.round(parseFloat(product.original_price)).toLocaleString()}
+                                    </span>
+                                </div>
+                            )}
 
                             {/* Price Section */}
                             {product.status === 'Auction' && auction ? (
@@ -341,9 +343,11 @@ export default function ProductDetailPage() {
                                     <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
                                         R{parseFloat(product.price).toLocaleString()}
                                     </span>
-                                    <span className="text-lg font-semibold text-green-500">
-                                        17% off
-                                    </span>
+                                    {product.original_price && parseFloat(product.original_price) > parseFloat(product.price) && (
+                                        <span className="text-lg font-semibold text-green-500">
+                                            {Math.round((1 - parseFloat(product.price) / parseFloat(product.original_price)) * 100)}% off
+                                        </span>
+                                    )}
                                 </div>
                             )}
 
