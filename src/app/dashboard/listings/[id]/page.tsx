@@ -42,6 +42,7 @@ interface UploadedImage {
 interface FormData {
     title: string;
     price: string;
+    original_price?: string;
     description?: string;
     condition: string;
     specs: Record<string, unknown>;
@@ -142,6 +143,7 @@ export default function EditListingPage() {
             reset({
                 title: productData.title,
                 price: productData.price.toString(),
+                original_price: productData.original_price?.toString() || '',
                 description: productData.description || '',
                 condition: productData.condition,
                 specs: productData.specs as Record<string, unknown>,
@@ -188,6 +190,7 @@ export default function EditListingPage() {
             await productsApi.update(productId, {
                 title: data.title,
                 price: parseFloat(data.price),
+                original_price: data.original_price ? parseFloat(data.original_price) : undefined,
                 description: data.description,
                 condition: data.condition,
                 specs: data.specs,
@@ -393,6 +396,14 @@ export default function EditListingPage() {
                                 {...register('price', { required: 'Price is required' })}
                                 error={errors.price?.message}
                                 required
+                            />
+                            <Input
+                                type="number"
+                                label="Original Price (Optional)"
+                                placeholder="0.00"
+                                step="0.01"
+                                {...register('original_price')}
+                                error={errors.original_price?.message}
                             />
                             <Select
                                 label="Condition"

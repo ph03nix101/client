@@ -52,6 +52,7 @@ export interface CreateProductPayload {
     category_id: number;
     title: string;
     price: number;
+    original_price?: number;
     description?: string;
     condition: string;
     specs: Record<string, unknown>;
@@ -66,6 +67,7 @@ export interface Product {
     title: string;
     slug?: string;
     price: string;
+    original_price?: string; // numeric string from backend
     description?: string;
     condition: string;
     specs: Record<string, unknown>;

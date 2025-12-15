@@ -84,9 +84,11 @@ export function ProductCard({ product, category, imageUrl, auction, variant = 'g
         ? (auctionData?.current_bid ? parseFloat(auctionData.current_bid) : parseFloat(auctionData?.starting_price || '0'))
         : parseFloat(product.price);
 
-    // Calculate discount percentage (mock for now - you can add original_price to product model)
-    const originalPrice = endPrice * 1.2; // Mock 20% higher original price
-    const discountPercent = Math.round(((originalPrice - endPrice) / originalPrice) * 100);
+    // Calculate dynamic discount
+    const originalPrice = product.original_price ? parseFloat(product.original_price) : 0;
+    const discountPercent = (originalPrice > endPrice)
+        ? Math.round(((originalPrice - endPrice) / originalPrice) * 100)
+        : 0;
 
     return (
         <Link href={`/product/${product.id}`} className={variant === 'list' ? 'w-full' : ''}>
