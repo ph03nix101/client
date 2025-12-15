@@ -544,5 +544,36 @@ export const ordersApi = {
         api.patch<Order>(`/orders/${id}/status`, { status, tracking_number: trackingNumber }).then(res => res.data),
 };
 
+export const adminCategoriesApi = {
+    // Categories
+    create: (data: { name: string; slug: string; icon?: string; is_published?: boolean }) =>
+        api.post<Category>('/admin/categories', data).then(res => res.data),
+
+    update: (id: number, data: { name?: string; slug?: string; icon?: string; is_published?: boolean }) =>
+        api.patch<Category>(`/admin/categories/${id}`, data).then(res => res.data),
+
+    delete: (id: number) =>
+        api.delete<{ message: string }>(`/admin/categories/${id}`).then(res => res.data),
+
+    clone: (data: { sourceId: number; newName: string; newSlug: string }) =>
+        api.post<Category>('/admin/categories/clone', data).then(res => res.data),
+
+    // Attributes
+    getAttributes: (categoryId: number) =>
+        api.get<CategoryAttribute[]>(`/admin/categories/${categoryId}/attributes`).then(res => res.data),
+
+    createAttribute: (categoryId: number, data: Omit<CategoryAttribute, 'id' | 'category_id'>) =>
+        api.post<CategoryAttribute>(`/admin/categories/${categoryId}/attributes`, data).then(res => res.data),
+
+    updateAttribute: (id: number, data: Partial<CategoryAttribute>) =>
+        api.patch<CategoryAttribute>(`/admin/attributes/${id}`, data).then(res => res.data),
+
+    deleteAttribute: (id: number) =>
+        api.delete<{ message: string }>(`/admin/attributes/${id}`).then(res => res.data),
+
+    reorderAttributes: (updates: { id: number; display_order: number }[]) =>
+        api.post<{ message: string }>('/admin/attributes/reorder', { updates }).then(res => res.data),
+};
+
 export default api;
 

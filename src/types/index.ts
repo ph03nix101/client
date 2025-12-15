@@ -3,6 +3,7 @@ export interface Category {
     name: string;
     slug: string;
     icon?: string;
+    is_published?: boolean;
 }
 
 export interface CategoryAttribute {

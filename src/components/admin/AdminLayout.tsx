@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { Header } from '@/components/Header';
-import { FiHome, FiUsers, FiCheckCircle, FiSettings, FiArrowLeft, FiFlag } from 'react-icons/fi';
+import { FiHome, FiUsers, FiCheckCircle, FiSettings, FiArrowLeft, FiFlag, FiGrid } from 'react-icons/fi';
 
 interface AdminLayoutProps {
     children: React.ReactNode;
@@ -13,6 +13,7 @@ interface AdminLayoutProps {
 
 const navItems = [
     { href: '/admin', label: 'Dashboard', icon: FiHome },
+    { href: '/admin/categories', label: 'Categories', icon: FiGrid },
     { href: '/admin/verification', label: 'Verification', icon: FiCheckCircle },
     { href: '/admin/reports', label: 'Reports', icon: FiFlag },
     { href: '/admin/users', label: 'Users', icon: FiUsers },
