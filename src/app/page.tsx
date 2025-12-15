@@ -225,59 +225,6 @@ export default function HomePage() {
                     </Link>
                 </section>
             </main>
-
-            {/* Footer */}
-            <footer
-                className="border-t mt-16"
-                style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)' }}
-            >
-                <div className="max-w-7xl mx-auto px-4 py-12">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        <div>
-                            <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-                                TechFinder
-                            </h3>
-                            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                                Your marketplace for buying and selling tech.
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
-                                Browse
-                            </h4>
-                            <ul className="space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                                <li><Link href="/browse" className="hover:underline">All Listings</Link></li>
-                                <li><Link href="/browse" className="hover:underline">Categories</Link></li>
-                                <li><Link href="/browse" className="hover:underline">Deals</Link></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
-                                Sell
-                            </h4>
-                            <ul className="space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                                <li><Link href="/sell" className="hover:underline">List an Item</Link></li>
-                                <li><Link href="/dashboard" className="hover:underline">Seller Dashboard</Link></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
-                                Account
-                            </h4>
-                            <ul className="space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                                <li><Link href="/login" className="hover:underline">Login</Link></li>
-                                <li><Link href="/register" className="hover:underline">Register</Link></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div
-                        className="border-t mt-8 pt-8 text-center text-sm"
-                        style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
-                    >
-                        © {new Date().getFullYear()} TechFinder. All rights reserved.
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 }

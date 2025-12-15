@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Product, Category, Auction } from '@/types';
 import Link from 'next/link';
 import { BsLaptop, BsCpu, BsGpuCard } from 'react-icons/bs';
-import { FiHeart } from 'react-icons/fi';
+import { FiHeart, FiArrowRight, FiShoppingCart } from 'react-icons/fi';
 import { wishlistApi } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 import { AuctionBadge } from '@/components/AuctionBadge';
@@ -84,30 +84,35 @@ export function ProductCard({ product, category, imageUrl, auction, variant = 'g
         ? (auctionData?.current_bid ? parseFloat(auctionData.current_bid) : parseFloat(auctionData?.starting_price || '0'))
         : parseFloat(product.price);
 
+    // Calculate discount percentage (mock for now - you can add original_price to product model)
+    const originalPrice = endPrice * 1.2; // Mock 20% higher original price
+    const discountPercent = Math.round(((originalPrice - endPrice) / originalPrice) * 100);
+
     return (
         <Link href={`/product/${product.id}`} className={variant === 'list' ? 'w-full' : ''}>
             <div
-                className={`group rounded-xl border overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer h-full flex ${variant === 'list' ? 'flex-row' : 'flex-col'
+                className={`group overflow-hidden transition-all duration-200 cursor-pointer h-full flex rounded-xl border shadow-sm hover:shadow-md dark:shadow-none ${variant === 'list' ? 'flex-row' : 'flex-col'
                     }`}
                 style={{
                     backgroundColor: 'var(--card-bg)',
                     borderColor: 'var(--border)',
                 }}
             >
-                {/* Image */}
+                {/* Image Container */}
                 <div
-                    className={`relative flex items-center justify-center overflow-hidden ${variant === 'list' ? 'w-48 h-full aspect-[4/3] shrink-0 border-r py-2 pl-2' : 'aspect-[4/3] w-full'
+                    className={`relative flex items-center justify-center overflow-hidden ${variant === 'list'
+                        ? 'w-48 h-full aspect-[4/3] shrink-0 border-r'
+                        : 'aspect-square border border-gray-200 dark:border-gray-700/30 rounded-lg mx-3 mt-3'
                         }`}
                     style={{
-                        backgroundColor: 'var(--bg-tertiary)',
-                        borderColor: 'var(--border)'
+                        backgroundColor: 'var(--bg-secondary)',
                     }}
                 >
                     {imageUrl ? (
                         <img
                             src={imageUrl}
                             alt={product.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
                         />
                     ) : (
                         <div style={{ color: 'var(--text-muted)' }}>
@@ -121,16 +126,13 @@ export function ProductCard({ product, category, imageUrl, auction, variant = 'g
                         </div>
                     )}
 
-                    {/* Condition Badge */}
-                    <span
-                        className="absolute top-2 right-2 text-xs px-2 py-1 rounded-full font-medium"
-                        style={{
-                            backgroundColor: 'var(--bg-secondary)',
-                            color: 'var(--text-secondary)',
-                        }}
-                    >
-                        {product.condition}
-                    </span>
+                    {/* Discount Badge - Top Right Circle */}
+                    {discountPercent > 0 && (
+                        <div className="absolute top-2 right-2 w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex flex-col items-center justify-center text-white font-bold shadow-lg">
+                            <span className="text-sm leading-none">{discountPercent}%</span>
+                            <span className="text-[10px] leading-none">off</span>
+                        </div>
+                    )}
 
                     {/* Auction Badge */}
                     {isAuction && (
@@ -142,32 +144,43 @@ export function ProductCard({ product, category, imageUrl, auction, variant = 'g
 
                 {/* Content */}
                 <div className="p-4 flex-1 flex flex-col">
-                    {/* Category badge */}
-                    <div
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-white mb-2 self-start bg-gradient-to-r ${categoryGradients[product.category_id] || 'from-gray-500 to-gray-600'}`}
-                    >
-                        {categoryIcons[product.category_id]}
-                        {category?.name || 'Product'}
-                    </div>
-
                     {/* Title */}
                     <h3
-                        className="font-semibold line-clamp-2 group-hover:text-blue-500 transition-colors mb-2"
+                        className="font-medium line-clamp-2 group-hover:text-blue-500 transition-colors mb-2 text-sm"
                         style={{ color: 'var(--text-primary)' }}
                     >
                         {product.title}
                     </h3>
 
-                    {/* Specs */}
-                    {displaySpecs.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mb-3">
-                            {displaySpecs.map((spec, i) => (
+                    {/* Seller & Condition Info */}
+                    <div className="flex items-center gap-2 mb-3 flex-wrap">
+                        <span
+                            className="text-xs font-medium px-2 py-0.5 rounded"
+                            style={{
+                                backgroundColor: 'var(--bg-tertiary)',
+                                color: 'var(--text-secondary)',
+                            }}
+                        >
+                            {category?.name || 'Product'}
+                        </span>
+                        <span className="text-orange-500 text-lg">●</span>
+                        <span
+                            className="text-xs font-medium px-2 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                        >
+                            {product.condition || 'New'}
+                        </span>
+                    </div>
+
+                    {/* Specs (compact) */}
+                    {displaySpecs.length > 0 && variant !== 'list' && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                            {displaySpecs.slice(0, 2).map((spec, i) => (
                                 <span
                                     key={i}
-                                    className="text-xs px-2 py-0.5 rounded"
+                                    className="text-[10px] px-1.5 py-0.5 rounded"
                                     style={{
                                         backgroundColor: 'var(--bg-tertiary)',
-                                        color: 'var(--text-secondary)',
+                                        color: 'var(--text-muted)',
                                     }}
                                 >
                                     {spec}
@@ -176,40 +189,58 @@ export function ProductCard({ product, category, imageUrl, auction, variant = 'g
                         </div>
                     )}
 
-                    {/* Price & Wishlist */}
-                    <div
-                        className="flex items-center justify-between mt-auto pt-2 border-t"
-                        style={{ borderColor: 'var(--border)' }}
-                    >
-                        <div className="flex flex-col">
-                            <span className={`text-xl font-bold ${isAuction ? 'text-orange-500' : 'text-blue-500'}`}>
-                                R {endPrice.toLocaleString()}
+                    {/* Price Section */}
+                    <div className="mb-3">
+                        <div className="flex items-baseline gap-2">
+                            <span className={`text-lg font-bold ${isAuction ? 'text-orange-500' : ''}`} style={{ color: isAuction ? undefined : 'var(--text-primary)' }}>
+                                R{endPrice.toLocaleString()}
                             </span>
-                            {isAuction && (
-                                <div className="flex flex-col gap-0.5 mt-0.5">
-                                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                                        {auctionData.bid_count} bid{auctionData.bid_count !== 1 ? 's' : ''}
-                                    </span>
-                                    <CompactAuctionCountdown endTime={auctionData.end_time} />
-                                </div>
-                            )}
+                            <span className="text-sm line-through" style={{ color: 'var(--text-muted)' }}>
+                                R{Math.round(originalPrice).toLocaleString()}
+                            </span>
                         </div>
-                        {user && (
-                            <button
-                                onClick={handleWishlistClick}
-                                disabled={wishlistLoading}
-                                className={`p-2 rounded-full transition-all ${isInWishlist
-                                    ? 'text-red-500 bg-red-500/10'
-                                    : 'text-gray-400 hover:text-red-500 hover:bg-red-500/10'
-                                    } disabled:opacity-50`}
-                                title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-                            >
-                                <FiHeart className={`w-5 h-5 ${isInWishlist ? 'fill-current' : ''}`} />
-                            </button>
+                        {isAuction && (
+                            <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                                    {auctionData.bid_count} bid{auctionData.bid_count !== 1 ? 's' : ''}
+                                </span>
+                                <CompactAuctionCountdown endTime={auctionData.end_time} />
+                            </div>
                         )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
+                        {/* Wishlist Button */}
+                        <button
+                            onClick={handleWishlistClick}
+                            disabled={wishlistLoading || !user}
+                            className={`p-2 rounded-full border transition-all ${isInWishlist
+                                ? 'text-red-500 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-red-300 hover:text-red-500'
+                                } disabled:opacity-50`}
+                            style={{ color: isInWishlist ? undefined : 'var(--text-muted)' }}
+                            title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                        >
+                            <FiHeart className={`w-4 h-4 ${isInWishlist ? 'fill-current' : ''}`} />
+                        </button>
+
+                        {/* Contact Supplier Button */}
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                // Contact supplier logic would go here
+                            }}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                            Contact Supplier
+                            <FiArrowRight className="w-4 h-4" />
+                        </button>
                     </div>
                 </div>
             </div>
         </Link>
     );
 }
+

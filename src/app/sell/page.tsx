@@ -279,8 +279,8 @@ export default function CreateListingPage() {
                                     type="button"
                                     onClick={() => setListingType('fixed')}
                                     className={`p-4 rounded-xl border-2 transition-all ${listingType === 'fixed'
-                                            ? 'border-blue-500 bg-blue-500/10'
-                                            : 'border-gray-600 hover:border-gray-500'
+                                        ? 'border-blue-500 bg-blue-500/10'
+                                        : 'border-gray-600 hover:border-gray-500'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3 mb-2">
@@ -297,8 +297,8 @@ export default function CreateListingPage() {
                                     type="button"
                                     onClick={() => setListingType('auction')}
                                     className={`p-4 rounded-xl border-2 transition-all ${listingType === 'auction'
-                                            ? 'border-orange-500 bg-orange-500/10'
-                                            : 'border-gray-600 hover:border-gray-500'
+                                        ? 'border-orange-500 bg-orange-500/10'
+                                        : 'border-gray-600 hover:border-gray-500'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3 mb-2">
@@ -471,18 +471,6 @@ export default function CreateListingPage() {
                     </form>
                 )}
             </div>
-
-            {/* Footer */}
-            <footer
-                className="border-t py-8 mt-12"
-                style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-secondary)' }}
-            >
-                <div className="max-w-7xl mx-auto px-4 text-center">
-                    <p style={{ color: 'var(--text-muted)' }}>
-                        © {new Date().getFullYear()} TechFinder. Built for tech enthusiasts.
-                    </p>
-                </div>
-            </footer>
         </div>
     );
 }

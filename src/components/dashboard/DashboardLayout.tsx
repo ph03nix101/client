@@ -33,32 +33,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
             <Header />
 
-            {/* Dashboard Header */}
-            <div
-                className="border-b"
-                style={{
-                    backgroundColor: 'var(--bg-secondary)',
-                    borderColor: 'var(--border)'
-                }}
-            >
-                <div className="max-w-7xl mx-auto px-4 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                                Seller Dashboard
-                            </h1>
-                        </div>
-                        <Link
-                            href="/sell"
-                            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                        >
-                            <FiPlus className="w-4 h-4" />
-                            New Listing
-                        </Link>
-                    </div>
-                </div>
-            </div>
-
             <div className="max-w-7xl mx-auto px-4 py-8">
                 <div className="flex gap-8">
                     {/* Sidebar */}

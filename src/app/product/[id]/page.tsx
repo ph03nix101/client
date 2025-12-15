@@ -190,31 +190,39 @@ export default function ProductDetailPage() {
         <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
             <Header />
 
-            <div className="max-w-6xl mx-auto px-4 py-8">
-                {/* Back Button */}
-                <button
-                    onClick={() => router.back()}
-                    className="flex items-center gap-2 mb-6 transition-colors"
-                    style={{ color: 'var(--text-secondary)' }}
-                >
-                    <FiArrowLeft className="w-5 h-5" />
-                    Back
-                </button>
+            <div className="max-w-7xl mx-auto px-4 py-6">
+                {/* Breadcrumb */}
+                <nav className="flex items-center gap-2 text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
+                    <Link href="/browse" className="hover:text-blue-500 transition-colors">All categories</Link>
+                    <span>›</span>
+                    {category && (
+                        <>
+                            <Link href={`/browse?category_id=${category.id}`} className="hover:text-blue-500 transition-colors">
+                                {category.name}
+                            </Link>
+                            <span>›</span>
+                        </>
+                    )}
+                    <span style={{ color: 'var(--text-primary)' }}>{product.title}</span>
+                </nav>
 
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                    {/* Left: Images */}
-                    <div className="lg:col-span-3">
-                        <div
-                            className="rounded-xl border overflow-hidden"
-                            style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
-                        >
-                            {/* Main Image */}
-                            <div className="aspect-[4/3] relative" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+                {/* Main Product Card */}
+                <div
+                    className="rounded-lg border p-6 mb-8"
+                    style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
+                >
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Product Image */}
+                        <div className="relative">
+                            <div
+                                className="aspect-square rounded-lg overflow-hidden"
+                                style={{ backgroundColor: 'var(--bg-tertiary)' }}
+                            >
                                 {images.length > 0 ? (
                                     <img
                                         src={`${imageBaseUrl}${images[selectedImageIndex].url}`}
                                         alt={product.title}
-                                        className="w-full h-full object-contain"
+                                        className="w-full h-full object-contain p-4"
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
@@ -225,9 +233,14 @@ export default function ProductDetailPage() {
                                 )}
                             </div>
 
+                            {/* Drop & Shop Badge */}
+                            <div className="absolute top-4 right-4 bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-full">
+                                TechFinder
+                            </div>
+
                             {/* Thumbnail Strip */}
                             {images.length > 1 && (
-                                <div className="flex gap-2 p-4 overflow-x-auto">
+                                <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
                                     {images.map((img, index) => (
                                         <button
                                             key={img.id}
@@ -249,75 +262,40 @@ export default function ProductDetailPage() {
                             )}
                         </div>
 
-                        {/* Description */}
-                        {product.description && (
-                            <div
-                                className="rounded-xl border p-6 mt-6"
-                                style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
-                            >
-                                <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Description</h2>
-                                <p className="whitespace-pre-wrap" style={{ color: 'var(--text-secondary)' }}>{product.description}</p>
-                            </div>
-                        )}
-
-                        {/* Specifications */}
-                        <div
-                            className="rounded-xl border p-6 mt-6"
-                            style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
-                        >
-                            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Technical Specifications</h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {Object.entries(specs).map(([key, value]) => {
-                                    if (value === null || value === undefined || value === '') return null;
-                                    const label = specLabels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                                    let displayValue = String(value);
-
-                                    // Format booleans
-                                    if (typeof value === 'boolean') {
-                                        displayValue = value ? 'Yes' : 'No';
-                                    }
-
-                                    return (
-                                        <div
-                                            key={key}
-                                            className="flex justify-between py-2 border-b"
-                                            style={{ borderColor: 'var(--border)' }}
-                                        >
-                                            <span style={{ color: 'var(--text-muted)' }}>{label}</span>
-                                            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{displayValue}</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right: Price & Actions */}
-                    <div className="lg:col-span-2">
-                        <div
-                            className="rounded-xl border p-6 sticky top-24"
-                            style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
-                        >
-                            {/* Category Badge */}
-                            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium text-white mb-4 bg-gradient-to-r ${categoryGradients[product.category_id] || 'from-gray-500 to-gray-600'}`}>
-                                {categoryIcons[product.category_id]}
-                                {category?.name || 'Product'}
-                            </div>
-
+                        {/* Product Info */}
+                        <div className="space-y-5">
                             {/* Title */}
-                            <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>{product.title}</h1>
-
-                            {/* Condition */}
-                            <div
-                                className="inline-block px-3 py-1 rounded-lg text-sm font-medium mb-4"
-                                style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}
-                            >
-                                {product.condition}
+                            <div>
+                                <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                                    {product.title}
+                                </h1>
+                                <div className="flex items-center gap-3">
+                                    <span
+                                        className="text-xs font-medium px-2.5 py-1 rounded border"
+                                        style={{
+                                            borderColor: 'var(--border)',
+                                            color: 'var(--text-secondary)',
+                                        }}
+                                    >
+                                        {product.condition || 'New'}
+                                    </span>
+                                    <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                                        {product.status === 'Active' ? 'Available' : product.status}
+                                    </span>
+                                </div>
                             </div>
 
-                            {/* Auction Bid Panel or Fixed Price */}
+                            {/* Indicative Price */}
+                            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                                Indicative market price:{' '}
+                                <span className="line-through">
+                                    R{Math.round(parseFloat(product.price) * 1.2).toLocaleString()}
+                                </span>
+                            </div>
+
+                            {/* Price Section */}
                             {product.status === 'Auction' && auction ? (
-                                <div className="mb-6">
+                                <div className="mb-4">
                                     <BidPanel
                                         auction={auction}
                                         productSellerId={product.seller_id}
@@ -325,129 +303,231 @@ export default function ProductDetailPage() {
                                     />
                                 </div>
                             ) : (
-                                <div className="text-4xl font-bold text-blue-500 mb-6">
-                                    R {parseFloat(product.price).toLocaleString()}
+                                <div className="flex items-baseline gap-3">
+                                    <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                                        R{parseFloat(product.price).toLocaleString()}
+                                    </span>
+                                    <span className="text-lg font-semibold text-green-500">
+                                        17% off
+                                    </span>
                                 </div>
                             )}
 
-                            {/* Actions */}
+                            {/* Contact Supplier */}
+                            {product.status !== 'Auction' && (
+                                <button
+                                    onClick={() => {
+                                        if (!user) {
+                                            router.push('/login?redirect=' + encodeURIComponent(`/product/${product.id}`));
+                                            return;
+                                        }
+                                        setShowMessageModal(true);
+                                    }}
+                                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-colors"
+                                >
+                                    <FiMessageCircle className="w-5 h-5" />
+                                    Contact Supplier
+                                </button>
+                            )}
+
+                            {/* Share & Watchlist */}
+                            <div
+                                className="flex items-center justify-between pb-4 border-b"
+                                style={{ borderColor: 'var(--border)' }}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Share</span>
+                                    <div className="flex items-center gap-1.5">
+                                        {['X', 'f', 'P', 'in', 'W', '✉', '📋'].map((icon, i) => (
+                                            <button
+                                                key={i}
+                                                className="w-7 h-7 rounded-full border flex items-center justify-center text-xs hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                                style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
+                                            >
+                                                {icon}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={async () => {
+                                        if (!user) {
+                                            router.push('/login?redirect=' + encodeURIComponent(`/product/${product?.id}`));
+                                            return;
+                                        }
+                                        if (!product) return;
+                                        setWishlistLoading(true);
+                                        try {
+                                            const result = await wishlistApi.toggleWishlist(product.id);
+                                            setIsInWishlist(result.added);
+                                        } catch (err) {
+                                            console.error('Failed to toggle wishlist:', err);
+                                        } finally {
+                                            setWishlistLoading(false);
+                                        }
+                                    }}
+                                    disabled={wishlistLoading}
+                                    className={`flex items-center gap-2 text-sm transition-colors ${isInWishlist ? 'text-red-500' : ''}`}
+                                    style={{ color: isInWishlist ? undefined : 'var(--text-muted)' }}
+                                >
+                                    <FiHeart className={`w-4 h-4 ${isInWishlist ? 'fill-current' : ''}`} />
+                                    {isInWishlist ? 'Added to watchlist' : 'Add to watchlist'}
+                                </button>
+                            </div>
+
+                            {/* Shipping Info */}
                             <div className="space-y-3">
-                                {user && user.id === product.seller_id ? (
-                                    <Link
-                                        href={`/dashboard/listings/${product.id}`}
-                                        className="w-full py-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium flex items-center justify-center gap-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        <FiArrowLeft className="w-5 h-5 rotate-180" /> {/* Reusing icon, maybe edit icon better? */}
-                                        Edit Listing
-                                    </Link>
-                                ) : (
-                                    <>
-                                        <Button
-                                            className="w-full py-3 text-lg"
-                                            onClick={() => {
-                                                if (!user) {
-                                                    router.push('/login?redirect=' + encodeURIComponent(`/product/${product.id}`));
-                                                    return;
-                                                }
-                                                setShowMessageModal(true);
-                                            }}
-                                        >
-                                            <FiMessageCircle className="w-5 h-5" />
-                                            Contact Seller
-                                        </Button>
-                                        <button
-                                            className="w-full py-3 rounded-lg border font-medium flex items-center justify-center gap-2 transition-colors"
-                                            style={{
-                                                borderColor: isInWishlist ? 'rgb(239 68 68)' : 'var(--border)',
-                                                color: isInWishlist ? 'rgb(239 68 68)' : 'var(--text-primary)',
-                                                backgroundColor: isInWishlist ? 'rgba(239, 68, 68, 0.1)' : 'var(--bg-tertiary)',
-                                            }}
-                                            disabled={wishlistLoading}
-                                            onClick={async () => {
-                                                if (!user) {
-                                                    router.push('/login?redirect=' + encodeURIComponent(`/product/${product?.id}`));
-                                                    return;
-                                                }
-                                                if (!product) return;
-                                                setWishlistLoading(true);
-                                                try {
-                                                    const result = await wishlistApi.toggleWishlist(product.id);
-                                                    setIsInWishlist(result.added);
-                                                } catch (err) {
-                                                    console.error('Failed to toggle wishlist:', err);
-                                                } finally {
-                                                    setWishlistLoading(false);
-                                                }
-                                            }}
-                                        >
-                                            <FiHeart className={`w-5 h-5 ${isInWishlist ? 'fill-current' : ''}`} />
-                                            {wishlistLoading ? 'Saving...' : (isInWishlist ? 'Saved to Wishlist' : 'Save to Wishlist')}
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-
-                            {/* Meta Info */}
-                            <div className="mt-6 pt-6 border-t space-y-3" style={{ borderColor: 'var(--border)' }}>
-                                <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-                                    <FiClock className="w-4 h-4" />
-                                    Listed on {createdDate}
-                                </div>
-                                <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-                                    <FiMapPin className="w-4 h-4" />
-                                    Location not specified
+                                <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Shipping</h3>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <span className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</span>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Standard courier shipping from </span>
+                                        <span className="text-blue-500 font-medium">R45</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <span className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</span>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Free collection from </span>
+                                        <span className="text-blue-500 font-medium">Johannesburg</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <span className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</span>
+                                        <span style={{ color: 'var(--text-secondary)' }}>Ready to ship in </span>
+                                        <span className="text-blue-500 font-medium">3 business days</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Seller Card */}
-                            <div className="mt-6 pt-6 border-t" style={{ borderColor: 'var(--border)' }}>
+                            {/* Seller Info */}
+                            <div className="pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
                                 <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Seller</h3>
                                 <Link
                                     href={seller ? `/seller/${seller.id}` : '#'}
                                     className="flex items-center gap-3 group"
                                 >
-                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
                                         {seller?.avatar_url ? (
                                             <img src={seller.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />
                                         ) : (
-                                            seller?.full_name?.charAt(0).toUpperCase() || <FiUser className="w-5 h-5" />
+                                            <span className="text-blue-600 dark:text-blue-400 font-bold text-lg">
+                                                {seller?.full_name?.charAt(0).toUpperCase() || 'S'}
+                                            </span>
                                         )}
                                     </div>
                                     <div>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="font-medium group-hover:text-blue-500 transition-colors" style={{ color: 'var(--text-primary)' }}>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium text-blue-500 group-hover:underline">
                                                 {seller?.full_name || seller?.username || 'Seller'}
                                             </span>
                                             {seller?.is_verified_seller && <VerifiedBadge size="sm" />}
+                                            <div className="flex items-center gap-1 text-yellow-500">
+                                                <span>★</span>
+                                                <span className="text-sm">165</span>
+                                            </div>
                                         </div>
-                                        <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                                            {seller?.created_at ? `Member since ${new Date(seller.created_at).getFullYear()}` : 'TechFinder Seller'}
-                                        </div>
+                                        <span className="text-sm text-green-500">98.5% Positive ratings</span>
                                     </div>
                                 </Link>
+                                <button
+                                    onClick={() => {
+                                        if (!user) {
+                                            router.push('/login?redirect=' + encodeURIComponent(`/product/${product.id}`));
+                                            return;
+                                        }
+                                        setShowMessageModal(true);
+                                    }}
+                                    className="flex items-center gap-2 mt-3 text-sm transition-colors hover:text-blue-500"
+                                    style={{ color: 'var(--text-muted)' }}
+                                >
+                                    <FiMessageCircle className="w-4 h-4" />
+                                    Ask the seller a question
+                                </button>
                             </div>
 
-                            {/* Share Actions */}
-                            <div className="mt-6 pt-6 border-t flex gap-2" style={{ borderColor: 'var(--border)' }}>
-                                <button
-                                    className="flex-1 py-2 rounded-lg border flex items-center justify-center gap-2 transition-colors"
-                                    style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
-                                >
-                                    <FiShare2 className="w-4 h-4" />
-                                    Share
-                                </button>
-                                {user && product && user.id !== product.seller_id && (
-                                    <button
-                                        onClick={() => setShowReportModal(true)}
-                                        className="flex-1 py-2 rounded-lg border flex items-center justify-center gap-2 transition-colors hover:border-red-500/50 hover:text-red-500"
-                                        style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
-                                    >
-                                        <FiFlag className="w-4 h-4" />
-                                        Report
-                                    </button>
-                                )}
+                            {/* Payment Option */}
+                            <div
+                                className="rounded-lg p-4 mt-4"
+                                style={{ backgroundColor: 'var(--bg-tertiary)' }}
+                            >
+                                <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Get it now, pay later</div>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className="font-bold" style={{ color: 'var(--text-primary)' }}>mobicred</span>
+                                    <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                                        from R{Math.round(parseFloat(product.price) / 12).toLocaleString()} p/m
+                                    </span>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* Product Details Section */}
+                <div
+                    className="rounded-lg border p-6 mb-8"
+                    style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}
+                >
+                    <h2 className="text-xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Product details</h2>
+
+                    {/* Details Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Condition</span>
+                            <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{product.condition || 'New'}</p>
+                        </div>
+                        <div>
+                            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Location</span>
+                            <p className="font-medium" style={{ color: 'var(--text-primary)' }}>South Africa</p>
+                        </div>
+                        <div>
+                            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Product code</span>
+                            <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{product.id.slice(0, 8).toUpperCase()}</p>
+                        </div>
+                        <div>
+                            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>TechFinder ID</span>
+                            <p className="font-medium" style={{ color: 'var(--text-primary)' }}>66260{product.id.slice(-4)}87</p>
+                        </div>
+                    </div>
+
+                    {/* Description & Features */}
+                    <div className="border-t pt-6" style={{ borderColor: 'var(--border)' }}>
+                        {product.description && (
+                            <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>{product.description}</p>
+                        )}
+
+                        {Object.keys(specs).length > 0 && (
+                            <>
+                                <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Key Features:</h3>
+                                <ul className="space-y-2">
+                                    {Object.entries(specs).map(([key, value]) => {
+                                        if (value === null || value === undefined || value === '') return null;
+                                        const label = specLabels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                        let displayValue = String(value);
+                                        if (typeof value === 'boolean') {
+                                            displayValue = value ? 'Yes' : 'No';
+                                        }
+                                        return (
+                                            <li key={key} className="flex items-start gap-2">
+                                                <span className="text-blue-500 font-bold">•</span>
+                                                <span style={{ color: 'var(--text-secondary)' }}>
+                                                    <strong style={{ color: 'var(--text-primary)' }}>{label}:</strong> {displayValue}
+                                                </span>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Report Link */}
+                    <div className="mt-6 text-right">
+                        {user && product && user.id !== product.seller_id && (
+                            <button
+                                onClick={() => setShowReportModal(true)}
+                                className="text-sm text-blue-500 hover:underline"
+                            >
+                                Report a problem
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -471,18 +551,6 @@ export default function ProductDetailPage() {
                     />
                 </div>
             )}
-
-            {/* Footer */}
-            <footer
-                className="border-t py-8 mt-12"
-                style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-secondary)' }}
-            >
-                <div className="max-w-7xl mx-auto px-4 text-center">
-                    <p style={{ color: 'var(--text-muted)' }}>
-                        © {new Date().getFullYear()} TechFinder. Built for tech enthusiasts.
-                    </p>
-                </div>
-            </footer>
 
             {/* Message Modal */}
             {showMessageModal && (

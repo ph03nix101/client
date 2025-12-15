@@ -8,9 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { FiSave, FiCheck, FiUser, FiMail } from 'react-icons/fi';
-
-// Test seller ID - will be replaced with auth
-const TEST_SELLER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+import { useAuth } from '@/components/AuthProvider';
 
 interface FormData {
     full_name: string;
@@ -20,6 +18,7 @@ interface FormData {
 }
 
 export default function ProfilePage() {
+    const { user: authUser } = useAuth();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -33,13 +32,18 @@ export default function ProfilePage() {
     } = useForm<FormData>();
 
     useEffect(() => {
-        loadUser();
-    }, []);
+        if (authUser?.id) {
+            loadUser();
+        } else {
+            setLoading(false);
+        }
+    }, [authUser?.id]);
 
     const loadUser = async () => {
+        if (!authUser?.id) return;
         setLoading(true);
         try {
-            const userData = await usersApi.getById(TEST_SELLER_ID);
+            const userData = await usersApi.getById(authUser.id);
             setUser(userData);
             reset({
                 full_name: userData.full_name || '',
@@ -55,9 +59,10 @@ export default function ProfilePage() {
     };
 
     const onSubmit = async (data: FormData) => {
+        if (!authUser?.id) return;
         setSaving(true);
         try {
-            const updatedUser = await usersApi.update(TEST_SELLER_ID, data);
+            const updatedUser = await usersApi.update(authUser.id, data);
             setUser(updatedUser);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);

@@ -205,18 +205,6 @@ export default function SellerProfilePage() {
                     )}
                 </div>
             </div>
-
-            {/* Footer */}
-            <footer
-                className="border-t py-8 mt-12"
-                style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-secondary)' }}
-            >
-                <div className="max-w-7xl mx-auto px-4 text-center">
-                    <p style={{ color: 'var(--text-muted)' }}>
-                        © {new Date().getFullYear()} TechFinder. Built for tech enthusiasts.
-                    </p>
-                </div>
-            </footer>
         </div>
     );
 }
