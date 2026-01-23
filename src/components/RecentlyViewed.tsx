@@ -59,9 +59,10 @@ export function RecentlyViewed({
                             title: item.title,
                             price: item.price,
                             condition: item.condition,
-                            status: 'active',
+                            status: 'Active',
                             category_id: 0,
                             seller_id: '',
+                            specs: {},
                             created_at: new Date().toISOString(),
                             updated_at: new Date().toISOString(),
                         }}

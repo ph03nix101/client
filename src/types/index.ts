@@ -75,7 +75,7 @@ export interface Product {
     specs: Record<string, unknown>;
     cpu_ref_id?: number;
     gpu_ref_id?: number;
-    status: 'Active' | 'Sold' | 'Draft' | 'Removed' | 'Auction';
+    status: 'Active' | 'Sold' | 'Draft' | 'Removed' | 'Auction' | 'Paused';
     created_at: string;
     updated_at: string;
     auction?: Auction;
@@ -97,6 +97,7 @@ export interface Auction {
     seller_id?: string;
     seller_username?: string;
     product?: Product;
+    image_url?: string;
 }
 
 export interface Bid {

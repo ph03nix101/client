@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Product, Category } from '@/types';
-import { productsApi, uploadsApi, categoriesApi, auctionsApi, Auction } from '@/lib/api';
+import { productsApi, uploadsApi, categoriesApi, auctionsApi } from '@/lib/api';
+import { Auction } from '@/types';
 import { ProductCard } from '@/components/ProductCard';
 import { FiClock } from 'react-icons/fi';
 import Link from 'next/link';
@@ -24,31 +25,6 @@ export function LiveAuctions() {
 
                 setAuctions(activeAuctions);
                 setCategories(cats);
-
-                // Fetch images for auction products
-                const imagePromises = activeAuctions.map(async (auction) => {
-                    if (!auction.product_id) return { id: auction.id, url: undefined };
-
-                    try {
-                        const imgs = await uploadsApi.getProductImages(auction.product_id);
-                        const primary = imgs.find((img) => img.is_primary) || imgs[0];
-                        return {
-                            id: auction.product_id,
-                            url: primary ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}${primary.url}` : undefined,
-                        };
-                    } catch {
-                        return { id: auction.product_id, url: undefined };
-                    }
-                });
-
-                const imageResults = await Promise.all(imagePromises);
-                const imageMap: Record<string, string> = {};
-                imageResults.forEach((result) => {
-                    if (result.url && result.id) {
-                        imageMap[result.id] = result.url;
-                    }
-                });
-                setImages(imageMap);
             } catch (err) {
                 console.error('Failed to fetch live auctions:', err);
             } finally {
@@ -121,7 +97,13 @@ export function LiveAuctions() {
                             key={auction.id}
                             product={auction.product}
                             category={getCategoryById(auction.product.category_id)}
-                            imageUrl={images[auction.product.id]}
+                            imageUrl={
+                                auction.image_url
+                                    ? (auction.image_url.startsWith('http')
+                                        ? auction.image_url
+                                        : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}${auction.image_url}`)
+                                    : undefined
+                            }
                             auction={auction}
                         />
                     )

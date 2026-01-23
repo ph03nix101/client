@@ -216,7 +216,6 @@ export function ShippingSelector({ productId, onShippingSelected, initialSelecti
                         <Button
                             type="button"
                             variant="outline"
-                            size="sm"
                             onClick={() => {
                                 setShowCustomForm(false);
                                 setCustomOption({});
@@ -226,7 +225,6 @@ export function ShippingSelector({ productId, onShippingSelected, initialSelecti
                         </Button>
                         <Button
                             type="button"
-                            size="sm"
                             onClick={addCustomOption}
                             disabled={!customOption.name || customOption.price === undefined}
                         >

@@ -58,7 +58,7 @@ export default function ListingsPage() {
         }
     };
 
-    const handleStatusChange = async (productId: string, newStatus: string) => {
+    const handleStatusChange = async (productId: string, newStatus: Product['status']) => {
         try {
             await productsApi.updateStatus(productId, newStatus);
             setProducts(products.map(p =>

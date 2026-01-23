@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Product, Category } from '@/types';
 import { productsApi, categoriesApi, uploadsApi, ProductSearchFilters, ProductsResponse } from '@/lib/api';
@@ -38,7 +38,7 @@ function parseUrlParams(searchParams: URLSearchParams) {
     };
 }
 
-export default function BrowsePage() {
+function BrowsePageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -421,5 +421,27 @@ export default function BrowsePage() {
                 )
             }
         </div >
+    );
+}
+
+export default function BrowsePage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+                <Header />
+                <div className="max-w-7xl mx-auto px-4 py-6">
+                    <div className="animate-pulse space-y-6">
+                        <div className="h-8 w-48 rounded" style={{ backgroundColor: 'var(--bg-tertiary)' }} />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                            {[1, 2, 3, 4, 5, 6].map((i) => (
+                                <div key={i} className="h-80 rounded-xl" style={{ backgroundColor: 'var(--card-bg)' }} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }>
+            <BrowsePageContent />
+        </Suspense>
     );
 }

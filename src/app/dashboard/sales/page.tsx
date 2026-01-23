@@ -132,8 +132,8 @@ export default function SalesPage() {
                     <button
                         onClick={() => setFilter('all')}
                         className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${filter === 'all'
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}
                     >
                         All ({sales.length})
@@ -146,8 +146,8 @@ export default function SalesPage() {
                                 key={opt.value}
                                 onClick={() => setFilter(opt.value)}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${filter === opt.value
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                                     }`}
                             >
                                 {opt.label} ({count})
@@ -269,7 +269,7 @@ export default function SalesPage() {
                                                 Mark as Delivered
                                             </button>
                                         )}
-                                        {sale.status !== 'shipped' && sale.status !== 'delivered' && (
+                                        {sale.status !== 'shipped' && (
                                             <button
                                                 onClick={() => handleStatusUpdate(sale.id, 'cancelled')}
                                                 disabled={updatingId === sale.id}
