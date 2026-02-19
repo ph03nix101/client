@@ -1,3 +1,15 @@
+## TechFinder — Full-Stack E-Commerce & Auction Platform
+Architected and developed a scalable, containerized marketplace application supporting both traditional e-commerce transactions and real-time product auctions.
+
+Backend Engineering: Built a modular, type-safe RESTful API using NestJS (Node.js/TypeScript) with a PostgreSQL database. Implemented advanced features including JWT authentication, role-based access control, secure file uploads via Multer, and automated email notifications using Nodemailer.
+
+Frontend Development: Created a responsive, server-side rendered interface using Next.js 16 (App Router) and React 19. Utilized Tailwind CSS v4 for modern styling and React Hook Form for efficient state management.
+
+Infrastructure & DevOps: Orchestrated the entire application stack (Frontend, Backend, Database) using Docker and Docker Compose, ensuring consistent environments across development and production.
+
+Key Features: Designed a custom auction engine with real-time bidding logic, integrated product reviews/ratings, and developed a comprehensive user messaging system.
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
